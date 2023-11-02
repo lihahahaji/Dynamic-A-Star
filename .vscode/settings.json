@@ -4,6 +4,7 @@
         "ostream": "cpp",
         "__tree": "cpp",
         "iostream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "iosfwd": "cpp"
     }
 }

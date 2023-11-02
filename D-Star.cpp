@@ -3,9 +3,13 @@
 #include <set>
 #include <iomanip>
 #include <fstream>
+#include <map>
+
 #define INF 0x3f3f3f
 using namespace std;
-const int maxn = 505;
+const int maxn = 2500;
+const int s_index = 0;
+const int e_index = 2499;
 
 // 定义遍历邻接节点的方向
 int directions[8][2] = {
@@ -26,7 +30,7 @@ struct Node
     // 当前节点的状态
     // 0 - new
     // 1 - open
-    // -1 - close
+    // -1 - closed
     int state;
 
     // 当前节点的坐标值
@@ -50,10 +54,12 @@ struct Node
 Node node[maxn];
 
 // 地图信息
-string mp[maxn];
+string mp[55];
 
 // 地图维数
 int n;
+
+map<int, bool> isPath;
 
 // OpenList & CloseList
 set<Node *> OpenList;
@@ -86,6 +92,9 @@ void init()
     }
     node[0].h = 0;
     node[0].k = 0;
+
+    // node[99].h = 0;
+    // node[99].k = 0;
 }
 
 bool isValidNode(int x, int y)
@@ -164,28 +173,84 @@ void dijkstra(int s, int e)
     }
 }
 
-void outPut_H_graph()
+// 输出最终确定的最短路径
+void outPut_Path()
 {
+    ofstream outputFile("output.md", ios::app);
+
+    int index = e_index;
+    while (index != 0)
+    {
+        isPath[index] = true;
+        index = node[index].father;
+    }
+
+    outputFile << "## Path" << endl;
+    outputFile << "```" << endl;
 
     int cnt = 0;
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            if (node[cnt].h == INF)
-                cout << "INF" << ' ';
+            if (isPath[cnt])
+                outputFile << "·" << ' ';
             else
-                cout << fixed << setprecision(1) << node[cnt].h << ' ';
+                outputFile << mp[i][j] << ' ';
             cnt++;
         }
-        cout << endl;
+        outputFile << endl;
     }
+    outputFile << "```" << endl;
+}
+
+// 输出 H 权值图
+void outPut_H_graph()
+{
+    ofstream outputFile("output.md", ios::app);
+    outputFile << "## H-Graph" << endl;
+    for (int i = -1; i < n; i++)
+    {
+        if (i >= 0)
+            outputFile << "|" << i;
+        else
+            outputFile << "|/";
+    }
+
+    outputFile << "|" << endl;
+    for (int i = -1; i < n; i++)
+        outputFile << "|-";
+    outputFile << "|" << endl;
+    int cnt = 0;
+    for (int i = 0; i < n; i++)
+    {
+        outputFile << "|" << i << "|";
+        for (int j = 0; j < n; j++)
+        {
+            if (node[cnt].h == INF)
+                outputFile << "inf" << '|';
+            else
+                outputFile << fixed << setprecision(1) << node[cnt].h << '|';
+            cnt++;
+        }
+        outputFile << endl;
+    }
+    outputFile << endl;
+}
+
+void outPut()
+{
+    ofstream outputFile("output.md");
+    outputFile << "# OutPuts" << endl;
+    outputFile << endl;
+    // outPut_H_graph();
+    outPut_Path();
 }
 
 int main()
 {
-    freopen("input.txt", "r", stdin);
+    freopen("input2.txt", "r", stdin);
     init();
-    dijkstra(0, 99);
-    outPut_H_graph();
+    dijkstra(s_index, e_index);
+    outPut();
 }
