@@ -1,0 +1,74 @@
+OpenList.insert(G)
+
+X = OpenList.findMinK()
+OpenList.erase(X)
+CloseList.insert(X)
+
+
+if(X.h > X.k) 
+{
+    -- raise
+    for Y in X_Near
+    {
+        -- 遍历 X 的邻接节点
+        if(Y.h < X.h && X.h > Y.h + C(X,Y))
+        {
+            X.h = Y.h + C(X,Y)
+            X.b = Y
+        }
+
+    }
+    if(X.h == X.k)
+    {
+        -- 回到了 Lower 状态
+        -- 拓展节点
+        for Y in X_Near
+        {
+            if(Y.state == new)
+            {
+                -- 1 该相邻节点从未被拓展过
+                Y.b = X
+                Y.h = X.h + C(X,Y)
+
+            }
+            else if(Y.b == X && Y.h != X.h + C(X,Y))
+            {
+                -- 2 该相邻节点的父节点是当前点 (出现动态障碍物)
+                Y.h = X.h + C(X,Y)
+            }
+            else if(Y.b != X && Y.h > X.h + C(X,Y))
+            {
+                -- 3
+                Y.b = X
+                Y.h = X.h + C(X,Y)
+            }
+        }
+    }
+    else if(X.h > X.k)
+    {
+        -- 没有回到 lower 状态
+        -- 拓展节点
+        for Y in X_Near
+        {
+            if(Y.state == new)
+            {
+                Y.b = X
+                Y.h = X.h + C(X,Y)
+                OpenList.insert(Y)
+            }
+            else if(Y.b == X && Y.h != X.h + C(X,Y))
+            {
+                Y.h = X.h + C(X,Y)
+                OpenList.insert(Y)
+            }
+            else if(Y.b != X && Y.h > X.h + C(X,y))
+            {
+                OpenList.insert(X)
+                
+            }
+
+
+        }
+    }
+
+}
