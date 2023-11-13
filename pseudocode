@@ -29,12 +29,15 @@ if(X.h > X.k)
                 -- 1 该相邻节点从未被拓展过
                 Y.b = X
                 Y.h = X.h + C(X,Y)
+                OpenList.insert(Y)
+                Y.state = open
 
             }
             else if(Y.b == X && Y.h != X.h + C(X,Y))
             {
                 -- 2 该相邻节点的父节点是当前点 (出现动态障碍物)
-                Y.h = X.h + C(X,Y)
+                Y.h = X.h + C(X,Y) 
+
             }
             else if(Y.b != X && Y.h > X.h + C(X,Y))
             {
@@ -44,7 +47,7 @@ if(X.h > X.k)
             }
         }
     }
-    else if(X.h > X.k)
+    else if(X.h > X.k) 
     {
         -- 没有回到 lower 状态
         -- 拓展节点
@@ -64,9 +67,15 @@ if(X.h > X.k)
             else if(Y.b != X && Y.h > X.h + C(X,y))
             {
                 OpenList.insert(X)
-                
+                -当前点x处于Raise态，即当前x处的代价值不是最优的，所以，我们将x放到OpenList中，等待下一次循环，当前点的代价值变成最优的后，再对该相邻节点进行处理，以此来保证传递下去的代价值是最小的
             }
+            else if(Y.b != X && X.h > Y.h + C(X,y) && Y.state == closed && Y.h > X.k)
+            {
+                OpenList.insert(Y)
+                Y.state = open
 
+            }
+            
 
         }
     }
