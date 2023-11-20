@@ -331,8 +331,10 @@ void D_star()
     OpenList.insert(&node[e_index]);
 
     // 重复调用 Process-state
-    while (process_state() != -1)
-        ;
+    while (OpenList.size())
+    {
+        int kmin = process_state();
+    }
 }
 
 // 输出 H 权值图
