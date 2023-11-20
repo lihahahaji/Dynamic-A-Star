@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include <map>
+#include <cmath>
 
 #define INF 0x3f3f3f
 using namespace std;
@@ -38,10 +39,10 @@ struct Node
     int y;
 
     // 当前节点的 h 值（也就是 dijkstra 中的 dis ）
-    double h;
+    int h;
 
     // 当前节点的 k 值
-    double k;
+    int k;
 
     // 当前节点指向的父节点
     int father;
@@ -148,14 +149,14 @@ void dijkstra(int s, int e)
                 OpenList.insert(N_near_Ptr);
                 N_near_Ptr->state = 1;
                 // 更新 h 值
-                N_near_Ptr->h = N_ptr->h + (i > 3 ? 1.4 : 1);
+                N_near_Ptr->h = N_ptr->h + (i > 3 ? 14 : 10);
                 // 将 n 设置为 n_near 的父结点
                 N_near_Ptr->father = N_ptr->index;
             }
             // 当前节点的状态为 open（已经访问过但是还没有确定最短路径）
             else if (N_near_Ptr->state == 1)
             {
-                double new_h = N_ptr->h + (i > 3 ? 1.4 : 1);
+                double new_h = N_ptr->h + (i > 3 ? 14 : 10);
                 if (N_near_Ptr->h > new_h)
                 {
                     N_near_Ptr->h = new_h;
@@ -171,6 +172,119 @@ void dijkstra(int s, int e)
                 return;
         }
     }
+}
+
+void Insert(Node *x, int h_new)
+{
+    if (x->state == 0)
+        x->k = h_new;
+    else if (x->state == 1)
+        x->k = min(x->k, h_new);
+    else if (x->state == -1)
+        x->k = min(x->h, h_new);
+    x->h = h_new;
+    x->state = 1;
+    OpenList.insert(x);
+}
+
+int process_state()
+{
+    Node *X = Min_state();
+    if (X == NULL)
+        return -1;
+    int k_old = X->k;
+    OpenList.erase(X);
+
+    // 在将路径成本变化传播到邻居节点	之前，先遍历其成本最佳的邻居，看看是否可以减少 X.h
+    if (k_old < X->h)
+    {
+        // 遍历邻接节点
+        for (int i = 0; i < 8; i++)
+        {
+            // 先判断当前节点是否存在（合法）
+            int n_near_x = X->x + directions[i][0];
+            int n_near_y = X->y + directions[i][1];
+            if (!isValidNode(n_near_x, n_near_y))
+                continue;
+
+            // 找到当前合法的邻接节点 Y
+            Node *Y = &node[n_near_x * n + n_near_y];
+
+            if (Y->h < k_old && X->h > Y->h + (i > 3 ? 14 : 10))
+            {
+                X->father = Y->index;
+                X->h = Y->h + (i > 3 ? 14 : 10);
+            }
+        }
+    }
+
+    if (X->h == k_old)
+    {
+        // 遍历邻接节点
+        for (int i = 0; i < 8; i++)
+        {
+            // 先判断当前节点是否存在（合法）
+            int n_near_x = X->x + directions[i][0];
+            int n_near_y = X->y + directions[i][1];
+            if (!isValidNode(n_near_x, n_near_y))
+                continue;
+
+            // 找到当前合法的邻接节点 Y
+            Node *Y = &node[n_near_x * n + n_near_y];
+
+            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + (i > 3 ? 14 : 10)) || (Y->father != X->index && Y->h > X->h + (i > 3 ? 14 : 10)))
+            {
+                Y->father = X->index;
+                Insert(Y, X->h + (i > 3 ? 14 : 10));
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            // 先判断当前节点是否存在（合法）
+            int n_near_x = X->x + directions[i][0];
+            int n_near_y = X->y + directions[i][1];
+            if (!isValidNode(n_near_x, n_near_y))
+                continue;
+
+            // 找到当前合法的邻接节点 Y
+            Node *Y = &node[n_near_x * n + n_near_y];
+
+            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + (i > 3 ? 14 : 10)))
+            {
+                Y->father = X->index;
+                Insert(Y, X->h + (i > 3 ? 14 : 10));
+            }
+            else
+            {
+                if (Y->father != X->index && Y->h > X->h + (i > 3 ? 14 : 10))
+                    Insert(X, X->h);
+                else
+                {
+                    if (Y->father != X->index && X->h > Y->h + (i > 3 ? 14 : 10) && Y->state == -1 && Y->h > k_old)
+                    {
+                        Insert(Y, Y->h);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 获取 OpenList 中 K 值最小的节点
+Node *Min_state()
+{
+    Node *X = *OpenList.begin();
+    for (set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
+    {
+        Node *n = *i;
+        if (n->k < X->k)
+            X = n;
+    }
+
+    return X;
 }
 
 // 输出最终确定的最短路径
@@ -202,6 +316,12 @@ void outPut_Path()
         outputFile << endl;
     }
     outputFile << "```" << endl;
+}
+
+
+void D_star()
+{
+    
 }
 
 // 输出 H 权值图
