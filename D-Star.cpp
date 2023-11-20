@@ -187,10 +187,24 @@ void Insert(Node *x, int h_new)
     OpenList.insert(x);
 }
 
+// 获取 OpenList 中 K 值最小的节点
+Node* Min_state()
+{
+    Node *X = *OpenList.begin();
+    for (set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
+    {
+        Node *n = *i;
+        if (n->k < X->k)
+            X = n;
+    }
+
+    return X;
+}
+
 int process_state()
 {
     Node *X = Min_state();
-    if (X == NULL)
+    if (X == NULL || X->index == s_index)
         return -1;
     int k_old = X->k;
     OpenList.erase(X);
@@ -275,19 +289,7 @@ int process_state()
     return Min_state()->k;
 }
 
-// 获取 OpenList 中 K 值最小的节点
-Node *Min_state()
-{
-    Node *X = *OpenList.begin();
-    for (set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
-    {
-        Node *n = *i;
-        if (n->k < X->k)
-            X = n;
-    }
 
-    return X;
-}
 
 // 输出最终确定的最短路径
 void outPut_Path()
@@ -320,18 +322,17 @@ void outPut_Path()
     outputFile << "```" << endl;
 }
 
-
 void D_star()
 {
     // 设置终点的 h 和 k 的值为 0
-    node[e_index].h  =0;
+    node[e_index].h = 0;
     node[e_index].k = 0;
     // 将终点加入开放列表
     OpenList.insert(&node[e_index]);
 
     // 重复调用 Process-state
-    while(process_state()!=-1);
-
+    while (process_state() != -1)
+        ;
 }
 
 // 输出 H 权值图
