@@ -271,6 +271,8 @@ int process_state()
             }
         }
     }
+    // 获取当前 Openlist 中最小的 K 值
+    return Min_state()->k;
 }
 
 // 获取 OpenList 中 K 值最小的节点
@@ -321,7 +323,15 @@ void outPut_Path()
 
 void D_star()
 {
-    
+    // 设置终点的 h 和 k 的值为 0
+    node[e_index].h  =0;
+    node[e_index].k = 0;
+    // 将终点加入开放列表
+    OpenList.insert(&node[e_index]);
+
+    // 重复调用 Process-state
+    while(process_state()!=-1);
+
 }
 
 // 输出 H 权值图
@@ -371,6 +381,7 @@ int main()
 {
     freopen("input2.txt", "r", stdin);
     init();
-    dijkstra(s_index, e_index);
+    // dijkstra(s_index, e_index);
+    D_star();
     outPut();
 }
