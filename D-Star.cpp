@@ -7,7 +7,6 @@
 #include <cmath>
 
 #define INF 0x3f3f3f
-using namespace std;
 const int maxn = 2500;
 const int s_index = 0;
 const int e_index = 2499;
@@ -55,25 +54,25 @@ struct Node
 Node node[maxn];
 
 // 地图信息
-string mp[55];
+std::string mp[55];
 
 // 地图维数
 int n;
 
-map<int, bool> isPath;
+std::map<int, bool> isPath;
 
 // OpenList & CloseList
-set<Node *> OpenList;
-set<Node *> CloseList;
+std::set<Node *> OpenList;
+std::set<Node *> CloseList;
 
 // 初始化
 void init()
 {
     // n * n 大小的栅格化地图
-    cin >> n;
+    std::cin >> n;
     // 输入地图数据
     for (int i = 0; i < n; i++)
-        cin >> mp[i];
+        std::cin >> mp[i];
 
     // 初始化节点数据
     int cnt = 0;
@@ -98,6 +97,7 @@ void init()
     // node[99].k = 0;
 }
 
+// 判断节点的合法性
 bool isValidNode(int x, int y)
 {
     if (x < 0 || x >= n || y < 0 || y >= n)
@@ -106,6 +106,12 @@ bool isValidNode(int x, int y)
         return false;
 
     return true;
+}
+
+// 邻接边的路径成本
+int cost(int i)
+{
+    return (i > 3 ? 14 : 10);
 }
 
 // 使用 dijkstra 规划最短路径
@@ -121,7 +127,7 @@ void dijkstra(int s, int e)
         int min_h_value = INF;
         // 找到当前正在处理的节点的指针
         Node *N_ptr;
-        for (set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
+        for (std::set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
         {
             Node *nodePtr = *i;
             if (nodePtr->h < min_h_value)
@@ -149,14 +155,14 @@ void dijkstra(int s, int e)
                 OpenList.insert(N_near_Ptr);
                 N_near_Ptr->state = 1;
                 // 更新 h 值
-                N_near_Ptr->h = N_ptr->h + (i > 3 ? 14 : 10);
+                N_near_Ptr->h = N_ptr->h + cost(i);
                 // 将 n 设置为 n_near 的父结点
                 N_near_Ptr->father = N_ptr->index;
             }
             // 当前节点的状态为 open（已经访问过但是还没有确定最短路径）
             else if (N_near_Ptr->state == 1)
             {
-                double new_h = N_ptr->h + (i > 3 ? 14 : 10);
+                double new_h = N_ptr->h + cost(i);
                 if (N_near_Ptr->h > new_h)
                 {
                     N_near_Ptr->h = new_h;
@@ -179,9 +185,9 @@ void Insert(Node *x, int h_new)
     if (x->state == 0)
         x->k = h_new;
     else if (x->state == 1)
-        x->k = min(x->k, h_new);
+        x->k = std::min(x->k, h_new);
     else if (x->state == -1)
-        x->k = min(x->h, h_new);
+        x->k = std::min(x->h, h_new);
     x->h = h_new;
     x->state = 1;
     OpenList.insert(x);
@@ -191,7 +197,7 @@ void Insert(Node *x, int h_new)
 Node* Min_state()
 {
     Node *X = *OpenList.begin();
-    for (set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
+    for (std::set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
     {
         Node *n = *i;
         if (n->k < X->k)
@@ -224,10 +230,10 @@ int process_state()
             // 找到当前合法的邻接节点 Y
             Node *Y = &node[n_near_x * n + n_near_y];
 
-            if (Y->h < k_old && X->h > Y->h + (i > 3 ? 14 : 10))
+            if (Y->h < k_old && X->h > Y->h + cost(i))
             {
                 X->father = Y->index;
-                X->h = Y->h + (i > 3 ? 14 : 10);
+                X->h = Y->h + cost(i);
             }
         }
     }
@@ -246,10 +252,10 @@ int process_state()
             // 找到当前合法的邻接节点 Y
             Node *Y = &node[n_near_x * n + n_near_y];
 
-            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + (i > 3 ? 14 : 10)) || (Y->father != X->index && Y->h > X->h + (i > 3 ? 14 : 10)))
+            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + cost(i)) || (Y->father != X->index && Y->h > X->h + cost(i)))
             {
                 Y->father = X->index;
-                Insert(Y, X->h + (i > 3 ? 14 : 10));
+                Insert(Y, X->h + cost(i));
             }
         }
     }
@@ -266,18 +272,18 @@ int process_state()
             // 找到当前合法的邻接节点 Y
             Node *Y = &node[n_near_x * n + n_near_y];
 
-            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + (i > 3 ? 14 : 10)))
+            if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + cost(i)))
             {
                 Y->father = X->index;
-                Insert(Y, X->h + (i > 3 ? 14 : 10));
+                Insert(Y, X->h + cost(i));
             }
             else
             {
-                if (Y->father != X->index && Y->h > X->h + (i > 3 ? 14 : 10))
+                if (Y->father != X->index && Y->h > X->h + cost(i))
                     Insert(X, X->h);
                 else
                 {
-                    if (Y->father != X->index && X->h > Y->h + (i > 3 ? 14 : 10) && Y->state == -1 && Y->h > k_old)
+                    if (Y->father != X->index && X->h > Y->h + cost(i) && Y->state == -1 && Y->h > k_old)
                     {
                         Insert(Y, Y->h);
                     }
@@ -294,7 +300,7 @@ int process_state()
 // 输出最终确定的最短路径
 void outPut_Path()
 {
-    ofstream outputFile("output.md", ios::app);
+    std::ofstream outputFile("output.md", std::ios::app);
 
     int index = e_index;
     while (index != 0)
@@ -303,8 +309,8 @@ void outPut_Path()
         index = node[index].father;
     }
 
-    outputFile << "## Path" << endl;
-    outputFile << "```" << endl;
+    outputFile << "## Path" << std::endl;
+    outputFile << "```" << std::endl;
 
     int cnt = 0;
     for (int i = 0; i < n; i++)
@@ -317,9 +323,9 @@ void outPut_Path()
                 outputFile << mp[i][j] << ' ';
             cnt++;
         }
-        outputFile << endl;
+        outputFile << std::endl;
     }
-    outputFile << "```" << endl;
+    outputFile << "```" << std::endl;
 }
 
 void D_star()
@@ -334,14 +340,15 @@ void D_star()
     while (OpenList.size())
     {
         int kmin = process_state();
+        std::cout<<kmin<< ' '<<OpenList.size()<<std::endl;
     }
 }
 
 // 输出 H 权值图
 void outPut_H_graph()
 {
-    ofstream outputFile("output.md", ios::app);
-    outputFile << "## H-Graph" << endl;
+    std::ofstream outputFile("output.md", std::ios::app);
+    outputFile << "## H-Graph" << std::endl;
     for (int i = -1; i < n; i++)
     {
         if (i >= 0)
@@ -350,10 +357,10 @@ void outPut_H_graph()
             outputFile << "|/";
     }
 
-    outputFile << "|" << endl;
+    outputFile << "|" << std::endl;
     for (int i = -1; i < n; i++)
         outputFile << "|-";
-    outputFile << "|" << endl;
+    outputFile << "|" << std::endl;
     int cnt = 0;
     for (int i = 0; i < n; i++)
     {
@@ -363,19 +370,19 @@ void outPut_H_graph()
             if (node[cnt].h == INF)
                 outputFile << "inf" << '|';
             else
-                outputFile << fixed << setprecision(1) << node[cnt].h << '|';
+                outputFile << std::fixed << std::setprecision(1) << node[cnt].h << '|';
             cnt++;
         }
-        outputFile << endl;
+        outputFile << std::endl;
     }
-    outputFile << endl;
+    outputFile << std::endl;
 }
 
 void outPut()
 {
-    ofstream outputFile("output.md");
-    outputFile << "# OutPuts" << endl;
-    outputFile << endl;
+    std::ofstream outputFile("output.md");
+    outputFile << "# OutPuts" << std::endl;
+    outputFile << std::endl;
     // outPut_H_graph();
     outPut_Path();
 }
