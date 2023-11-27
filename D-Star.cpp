@@ -5,11 +5,14 @@
 #include <fstream>
 #include <map>
 #include <cmath>
+using namespace std;
 
 #define INF 0x3f3f3f
 const int maxn = 2500;
 const int s_index = 0;
 const int e_index = 2499;
+
+#define OUTPUT_FILE "ouput_1.md"
 
 // 定义遍历邻接节点的方向
 int directions[8][2] = {
@@ -90,11 +93,11 @@ void init()
             cnt++;
         }
     }
-    node[0].h = 0;
-    node[0].k = 0;
+    // node[0].h = 0;
+    // node[0].k = 0;
 
-    // node[99].h = 0;
-    // node[99].k = 0;
+    node[99].h = 0;
+    node[99].k = 0;
 }
 
 // 判断节点的合法性
@@ -207,17 +210,23 @@ Node* Min_state()
     return X;
 }
 
+
+
 int process_state()
 {
     Node *X = Min_state();
-    if (X == NULL || X->index == s_index)
+    if (X == NULL)
         return -1;
     int k_old = X->k;
     OpenList.erase(X);
-
+    X->state = -1;
+    
     // 在将路径成本变化传播到邻居节点	之前，先遍历其成本最佳的邻居，看看是否可以减少 X.h
     if (k_old < X->h)
     {
+        // cout<<"ERROR_1"<<endl;
+        // cout<<"K-old:" <<k_old << " X.h : "<< X->h<<endl;
+        // cout<<endl;
         // 遍历邻接节点
         for (int i = 0; i < 8; i++)
         {
@@ -254,6 +263,9 @@ int process_state()
 
             if (Y->state == 0 || (Y->father == X->index && Y->h != X->h + cost(i)) || (Y->father != X->index && Y->h > X->h + cost(i)))
             {
+
+                if(Y->state != 0) std::cout<<"ERROR\n";
+
                 Y->father = X->index;
                 Insert(Y, X->h + cost(i));
             }
@@ -300,10 +312,10 @@ int process_state()
 // 输出最终确定的最短路径
 void outPut_Path()
 {
-    std::ofstream outputFile("output.md", std::ios::app);
+    std::ofstream outputFile(OUTPUT_FILE, std::ios::app);
 
-    int index = e_index;
-    while (index != 0)
+    int index = s_index;
+    while (index != e_index)
     {
         isPath[index] = true;
         index = node[index].father;
@@ -337,17 +349,27 @@ void D_star()
     OpenList.insert(&node[e_index]);
 
     // 重复调用 Process-state
-    while (OpenList.size())
+    int cnt =1;
+    while (OpenList.size() && node[s_index].state != -1)
     {
+        std::cout<<"No." <<cnt++<<": ";
+        if(cnt == 2700) break;
         int kmin = process_state();
         std::cout<<kmin<< ' '<<OpenList.size()<<std::endl;
+
+        for (std::set<Node *>::iterator i = OpenList.begin(); i != OpenList.end(); i++)
+        {
+            Node *n = *i;
+            std::cout<< n->index <<" ";
+        }
+        std::cout<<'\n';
     }
 }
 
 // 输出 H 权值图
 void outPut_H_graph()
 {
-    std::ofstream outputFile("output.md", std::ios::app);
+    std::ofstream outputFile(OUTPUT_FILE, std::ios::app);
     outputFile << "## H-Graph" << std::endl;
     for (int i = -1; i < n; i++)
     {
@@ -380,7 +402,7 @@ void outPut_H_graph()
 
 void outPut()
 {
-    std::ofstream outputFile("output.md");
+    std::ofstream outputFile(OUTPUT_FILE);
     outputFile << "# OutPuts" << std::endl;
     outputFile << std::endl;
     // outPut_H_graph();
