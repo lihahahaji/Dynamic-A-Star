@@ -221,7 +221,7 @@ int process_state()
     OpenList.erase(X);
     X->state = -1;
     
-    // 在将路径成本变化传播到邻居节点	之前，先遍历其成本最佳的邻居，看看是否可以减少 X.h
+    // 在将路径成本变化传播到邻居节点之前，先遍历其成本最佳的邻居，看看是否可以减少 X.h
     if (k_old < X->h)
     {
         // cout<<"ERROR_1"<<endl;
